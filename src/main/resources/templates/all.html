@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>all posts</title>
+</head>
+<body>
+All posts
+<div th:each="post : ${posts}">
+    <b th:text="${post.getId()}"></b>
+    <a th:text="${post.getTitle()}" th:href="@{/posts/{id}(id=${post.getId()})}"></a>
+    <i th:text="${post.getTag()}"></i>
+</div>
+
+<form th:method="POST" th:action="@{/posts/find}">
+    <input type="text" name="filter" placeholder="type tag here">
+    <button type="submit">find!</button>
+</form>
+
+<form th:method="POST" th:action="@{/posts/create}">
+    <input type="text" name="title" placeholder="type a title">
+    <input type="text" name="tag" placeholder="define tag">
+    <button type="submit">create!</button>
+</form>
+<form th:action="@{/logout}" method="post">
+    <input type="submit" value="Sign Out"/>
+</form>
+</body>
+</html>
