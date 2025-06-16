@@ -1,14 +1,17 @@
 package com.harmyFounder.SpringBootProject.controller;
 
+import com.harmyFounder.SpringBootProject.dto.NoteUpdateDto;
 import com.harmyFounder.SpringBootProject.model.Note;
 import com.harmyFounder.SpringBootProject.service.NoteService;
 import com.harmyFounder.SpringBootProject.service.UserService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
-@RequestMapping("notes")
+@RequestMapping("/api/notes")
 public class NoteController {
 
     private final NoteService noteService;
@@ -39,8 +42,11 @@ public class NoteController {
     }
 
     @PutMapping("/{userId}/{id}")
-    public void updateNote(@PathVariable("userId") Long userId, @PathVariable("id") Long id, @RequestParam String tittle, @RequestParam String text){
-        noteService.updateNote(userId, id, tittle, text);
+    public ResponseEntity<?> updateNote(
+            @PathVariable("userId") Long userId,
+            @PathVariable("id") Long id,
+            @RequestBody NoteUpdateDto updateDto) {
+        noteService.updateNote(userId, id, updateDto.getTittle(), updateDto.getText());
+        return ResponseEntity.ok().build();
     }
-
 }

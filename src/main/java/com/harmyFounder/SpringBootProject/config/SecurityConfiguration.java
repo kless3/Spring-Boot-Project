@@ -1,7 +1,6 @@
 package com.harmyFounder.SpringBootProject.config;
 
 import com.harmyFounder.SpringBootProject.service.UserService;
-import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,20 +17,27 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 
 @Configuration
 @EnableWebSecurity
-@NoArgsConstructor
+
 public class SecurityConfiguration {
 
-    private UserService userService;
-    private TokenFilter tokenFilter;
+    private final UserService userService;
+    private final TokenFilter tokenFilter;
+
 
     @Autowired
-    public SecurityConfiguration(UserService userService, TokenFilter tokenFilter) {
+    public SecurityConfiguration(UserService userService,
+                                 TokenFilter tokenFilter) {
         this.userService = userService;
         this.tokenFilter = tokenFilter;
+
     }
 
     @Bean
@@ -45,23 +51,50 @@ public class SecurityConfiguration {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
 
+        // Разрешаем доступ с фронтенда (React на 3000 порту)
+        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
 
+        // Разрешаем все основные HTTP-методы
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
+        // Разрешаем все необходимые заголовки
+        configuration.setAllowedHeaders(List.of(
+                "Authorization",
+                "Content-Type",
+                "Accept",
+                "X-Requested-With",
+                "Cache-Control"
+        ));
+
+        // Разрешаем передачу куки/авторизационных данных
+        configuration.setAllowCredentials(true);
+
+        // Настройка максимального времени кеширования CORS-префлайт запросов
+        configuration.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration); // Применяем ко всем URL
+
+        return source;
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(httpSecurityCorsConfigurer -> httpSecurityCorsConfigurer.configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues()))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Используем наш бин
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/secured/**", "/notes/**", "/habits/**").authenticated()
-                        .anyRequest().permitAll()
-                ).addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class);
+                        .anyRequest().permitAll())
+                .addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

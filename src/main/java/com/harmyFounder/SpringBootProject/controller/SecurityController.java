@@ -1,8 +1,10 @@
 package com.harmyFounder.SpringBootProject.controller;
 
 import com.harmyFounder.SpringBootProject.config.JwtCore;
+import com.harmyFounder.SpringBootProject.dto.AuthResponse;
 import com.harmyFounder.SpringBootProject.dto.SigninRequest;
 import com.harmyFounder.SpringBootProject.dto.SignupRequest;
+import com.harmyFounder.SpringBootProject.dto.UserDTO;
 import com.harmyFounder.SpringBootProject.model.User;
 import com.harmyFounder.SpringBootProject.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,20 +37,23 @@ public class SecurityController {
 
 
     @PostMapping("/signin")
-    public ResponseEntity<String> signIn(@RequestBody SigninRequest request){
+    public ResponseEntity<AuthResponse> signIn(@RequestBody SigninRequest request){
 
-        Authentication authentication = null;
 
-        try{
-            authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
-        } catch(BadCredentialsException e) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
         String jwt = jwtCore.generateToken(authentication);
 
+        User user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return ResponseEntity.ok(jwt);
+
+        return ResponseEntity.ok(new AuthResponse(
+                jwt,
+                new UserDTO(
+                        user.getId(),  // Убедитесь, что эти поля заполнены
+                        user.getUsername()
+                )
+        ));
     }
 
     @PostMapping("/signup")
