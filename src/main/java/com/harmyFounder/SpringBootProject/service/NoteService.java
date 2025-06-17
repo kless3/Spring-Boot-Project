@@ -5,6 +5,8 @@ import com.harmyFounder.SpringBootProject.model.User;
 import com.harmyFounder.SpringBootProject.repository.NoteRepository;
 import com.harmyFounder.SpringBootProject.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,19 +25,21 @@ public class NoteService {
     }
 
 
-    public List<Note> getAllNotesByUser(Long id){
+    public ResponseEntity<?> getAllNotesByUser(Long id) {
         Optional<User> user = userRepository.findById(id);
-        if (user.isEmpty()){
-            throw new IllegalStateException("User not found");
+        if (user.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("User not found with id: " + id);
         }
 
         Optional<List<Note>> notes = noteRepository.findAllByUser(user.get());
-        if (notes.isEmpty()){
-            throw new IllegalStateException("Notes not found");
+        if (notes.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("No notes found for user with id: " + id);
         }
-        return notes.get();
-    }
 
+        return ResponseEntity.ok(notes.get());
+    }
 
     public Note getNoteById(Long userId, Long id) {
         Optional<User> user = userRepository.findById(userId);
@@ -97,7 +101,6 @@ public class NoteService {
         }
 
     }
-
 
 
 }

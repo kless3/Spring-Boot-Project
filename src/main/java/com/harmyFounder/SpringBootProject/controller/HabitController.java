@@ -3,6 +3,7 @@ package com.harmyFounder.SpringBootProject.controller;
 import com.harmyFounder.SpringBootProject.model.Habit;
 import com.harmyFounder.SpringBootProject.service.HabitService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.List;
 @RequestMapping("habits")
 public class HabitController {
 
-    private HabitService habitService;
+    private final HabitService habitService;
 
     @Autowired
     public HabitController(HabitService habitService) {
@@ -19,23 +20,51 @@ public class HabitController {
     }
 
     @GetMapping("/{userId}/tracker")
-    public List<Habit> getHabitTracker(@PathVariable Long userId){
-        return habitService.getHabitListByUser(userId);
+    public ResponseEntity<?> getHabitTracker(@PathVariable Long userId) {
+        try {
+            List<Habit> habits = habitService.getHabitListByUser(userId);
+            if (habits.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            }
+            return ResponseEntity.ok(habits);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping("/{userId}/tracker")
-    public Habit addHabitToTracker(@RequestBody Habit habit, @PathVariable Long userId){
-        return habitService.addHabitToList(habit, userId);
+    public ResponseEntity<?> addHabitToTracker(
+            @RequestBody Habit habit,
+            @PathVariable Long userId) {
+        try {
+            // Валидация
+            if (habit.getTittle() == null || habit.getTittle().isEmpty()) {
+                return ResponseEntity.badRequest().body("Habit title must not be empty");
+            }
+            return ResponseEntity.ok(habitService.addHabitToList(habit, userId));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping("/{habitId}/tracker/status")
-    public Habit changeHabitStatus(@PathVariable Long habitId){
-        return habitService.changeHabitStatus(habitId);
+    public ResponseEntity<?> changeHabitStatus(@PathVariable Long habitId) {
+        try {
+            return ResponseEntity.ok(habitService.changeHabitStatus(habitId));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{userId}/{id}")
-    public void deleteHabit(@PathVariable Long userId, @PathVariable Long id){
-        habitService.deleteHabitById(userId, id);
+    public ResponseEntity<?> deleteHabit(
+            @PathVariable Long userId,
+            @PathVariable Long id) {
+        try {
+            habitService.deleteHabitById(userId, id);
+            return ResponseEntity.ok().build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
-
 }

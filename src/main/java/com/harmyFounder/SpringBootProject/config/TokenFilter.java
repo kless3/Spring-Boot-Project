@@ -39,13 +39,13 @@ public class TokenFilter extends OncePerRequestFilter {
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                    // Проверяем валидность токена
+
                     if (jwtCore.validateToken(jwt, userDetails)) {
                         UsernamePasswordAuthenticationToken authentication =
                                 new UsernamePasswordAuthenticationToken(
                                         userDetails,
                                         null,
-                                        userDetails.getAuthorities()); // Добавляем authorities
+                                        userDetails.getAuthorities());
 
                         SecurityContextHolder.getContext().setAuthentication(authentication);
                     }

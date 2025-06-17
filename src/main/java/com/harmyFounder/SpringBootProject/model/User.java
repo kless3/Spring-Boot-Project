@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -20,8 +19,6 @@ public class User {
     private String email;
     private String password;
 
-
-
     public String getPassword() {
         return password;
     }
@@ -30,8 +27,6 @@ public class User {
     public void setPassword(String password) {
         this.password = password;
     }
-
-
 
     @OneToMany(mappedBy = "user")
     @JsonIgnore
@@ -45,7 +40,7 @@ public class User {
     public User() {
     }
 
-    public User(Long id, String name, String email, LocalDate dateOfBirth, Integer age) {
+    public User(Long id, String name, String email) {
         this.id = id;
         this.username = name;
         this.email = email;

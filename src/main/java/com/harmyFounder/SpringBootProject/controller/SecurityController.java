@@ -50,7 +50,7 @@ public class SecurityController {
         return ResponseEntity.ok(new AuthResponse(
                 jwt,
                 new UserDTO(
-                        user.getId(),  // Убедитесь, что эти поля заполнены
+                        user.getId(),
                         user.getUsername()
                 )
         ));

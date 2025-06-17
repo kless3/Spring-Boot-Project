@@ -6,7 +6,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.core.user.OAuth2User;
+
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -23,9 +23,6 @@ public class JwtCore {
     public String generateToken(Authentication authentication) {
         if (authentication.getPrincipal() instanceof UserDetailsImpl userDetails) {
             return buildToken(userDetails.getUsername());
-        } else if (authentication.getPrincipal() instanceof OAuth2User oAuth2User) {
-            String email = oAuth2User.getAttribute("email");
-            return buildToken(email);
         }
         throw new IllegalArgumentException("Unsupported authentication type");
     }
@@ -44,7 +41,6 @@ public class JwtCore {
     }
 
 
-    //added just now
     public boolean validateToken(String token, UserDetails userDetails) {
         final String username = getNameFromJwt(token);
         return (username.equals(userDetails.getUsername()));

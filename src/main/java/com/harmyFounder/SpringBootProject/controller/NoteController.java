@@ -20,25 +20,51 @@ public class NoteController {
         this.noteService = noteService;
     }
 
-
     @GetMapping("/{id}")
-    public List<Note> getAllNotesByUser(@PathVariable Long id){
-        return noteService.getAllNotesByUser(id);
+    public ResponseEntity<?> getAllNotesByUser(@PathVariable Long id) {
+        try {
+            return noteService.getAllNotesByUser(id);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/{userId}/{id}")
-    public Note getNoteById(@PathVariable("userId") Long userId, @PathVariable("id") Long id){
-        return noteService.getNoteById(userId, id);
+    public ResponseEntity<?> getNoteById(
+            @PathVariable("userId") Long userId,
+            @PathVariable("id") Long id) {
+        try {
+            return ResponseEntity.ok(noteService.getNoteById(userId, id));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping("/{userId}")
-    public Note createNote(@RequestBody Note note, @PathVariable Long userId){
-        return noteService.createNote(note, userId);
+    public ResponseEntity<?> createNote(
+            @RequestBody Note note,
+            @PathVariable Long userId) {
+        try {
+            if (note.getTittle() == null || note.getTittle().isEmpty() ||
+                    note.getText() == null || note.getText().isEmpty()) {
+                return ResponseEntity.badRequest().body("Title and text must not be empty");
+            }
+            return ResponseEntity.ok(noteService.createNote(note, userId));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{userId}/{id}")
-    public void deleteNoteById(@PathVariable("userId") Long userId, @PathVariable("id") Long id){
-        noteService.deleteNoteById(userId, id);
+    public ResponseEntity<?> deleteNoteById(
+            @PathVariable("userId") Long userId,
+            @PathVariable("id") Long id) {
+        try {
+            noteService.deleteNoteById(userId, id);
+            return ResponseEntity.ok().build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PutMapping("/{userId}/{id}")
@@ -46,7 +72,11 @@ public class NoteController {
             @PathVariable("userId") Long userId,
             @PathVariable("id") Long id,
             @RequestBody NoteUpdateDto updateDto) {
-        noteService.updateNote(userId, id, updateDto.getTittle(), updateDto.getText());
-        return ResponseEntity.ok().build();
+        try {
+            noteService.updateNote(userId, id, updateDto.getTittle(), updateDto.getText());
+            return ResponseEntity.ok().build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

@@ -7,9 +7,6 @@ import lombok.Data;
 @AllArgsConstructor
 public class AuthResponse {
     private String token;
-    private UserDTO user; // Или только ID, если передаете минимальные данные
+    private UserDTO user;
 
-
-
-    // constructor, getters
 }

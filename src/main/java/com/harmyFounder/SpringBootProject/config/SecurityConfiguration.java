@@ -55,13 +55,13 @@ public class SecurityConfiguration {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Разрешаем доступ с фронтенда (React на 3000 порту)
+
         configuration.setAllowedOrigins(List.of("http://localhost:3000"));
 
-        // Разрешаем все основные HTTP-методы
+
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
-        // Разрешаем все необходимые заголовки
+
         configuration.setAllowedHeaders(List.of(
                 "Authorization",
                 "Content-Type",
@@ -70,14 +70,14 @@ public class SecurityConfiguration {
                 "Cache-Control"
         ));
 
-        // Разрешаем передачу куки/авторизационных данных
+
         configuration.setAllowCredentials(true);
 
-        // Настройка максимального времени кеширования CORS-префлайт запросов
+
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration); // Применяем ко всем URL
+        source.registerCorsConfiguration("/**", configuration);
 
         return source;
     }

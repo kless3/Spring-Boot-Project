@@ -4,7 +4,7 @@ public class NoteUpdateDto {
     private String tittle;
     private String text;
 
-    // Геттеры и сеттеры
+
     public String getTittle() {
         return tittle;
     }
